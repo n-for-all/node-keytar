@@ -182,16 +182,16 @@ void FindCredentialsWorker::HandleOKCallback() {
       keytar::Credentials cred = *it;
       v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
-      v8::Local<v8::String> account = Nan::New<v8::String>(
+      v8::Local<v8::String> server = Nan::New<v8::String>(
         cred.first.data(),
         cred.first.length()).ToLocalChecked();
 
-      v8::Local<v8::String> password = Nan::New<v8::String>(
+      v8::Local<v8::String> account = Nan::New<v8::String>(
         cred.second.data(),
         cred.second.length()).ToLocalChecked();
 
+      obj->Set(Nan::New("server").ToLocalChecked(), server);
       obj->Set(Nan::New("account").ToLocalChecked(), account);
-      obj->Set(Nan::New("password").ToLocalChecked(), password);
 
       Nan::Set(val, idx, obj);
       ++idx;
