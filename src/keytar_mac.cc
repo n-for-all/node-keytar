@@ -59,11 +59,18 @@ KEYTAR_OP_RESULT AddPassword(const std::string& service,
                              const std::string& password,
                              std::string* error,
                              bool returnNonfatalOnDuplicate) {
-  OSStatus status = SecKeychainAddGenericPassword(NULL,
+  OSStatus status = SecKeychainAddInternetPassword(NULL,
                                                   service.length(),
                                                   service.data(),
+                                                  0,
+                                                  NULL,
                                                   account.length(),
                                                   account.data(),
+                                                  0,
+                                                  NULL,
+                                                  0,
+                                                  kSecProtocolTypeAny,
+                                                  kSecAuthenticationTypeDefault,
                                                   password.length(),
                                                   password.data(),
                                                   NULL);
@@ -104,11 +111,18 @@ KEYTAR_OP_RESULT GetPassword(const std::string& service,
                              std::string* error) {
   void *data;
   UInt32 length;
-  OSStatus status = SecKeychainFindGenericPassword(NULL,
+  OSStatus status = SecKeychainFindInternetPassword(NULL,
                                                    service.length(),
                                                    service.data(),
+                                                   0,
+                                                   NULL,
                                                    account.length(),
                                                    account.data(),
+                                                   0,
+                                                   NULL,
+                                                   0,
+                                                   kSecProtocolTypeAny,
+                                                   kSecAuthenticationTypeAny,
                                                    &length,
                                                    &data,
                                                    NULL);
@@ -129,11 +143,18 @@ KEYTAR_OP_RESULT DeletePassword(const std::string& service,
                                 const std::string& account,
                                 std::string* error) {
   SecKeychainItemRef item;
-  OSStatus status = SecKeychainFindGenericPassword(NULL,
+  OSStatus status = SecKeychainFindInternetPassword(NULL,
                                                    service.length(),
                                                    service.data(),
+                                                   0,
+                                                   NULL,
                                                    account.length(),
                                                    account.data(),
+                                                   0,
+                                                   NULL,
+                                                   0,
+                                                   kSecProtocolTypeAny,
+                                                   kSecAuthenticationTypeAny,
                                                    NULL,
                                                    NULL,
                                                    &item);
@@ -162,11 +183,18 @@ KEYTAR_OP_RESULT FindPassword(const std::string& service,
   void *data;
   UInt32 length;
 
-  OSStatus status = SecKeychainFindGenericPassword(NULL,
+  OSStatus status = SecKeychainFindInternetPassword(NULL,
                                                    service.length(),
                                                    service.data(),
                                                    0,
                                                    NULL,
+                                                   0,
+                                                   NULL,
+                                                   0,
+                                                   NULL,
+                                                   0,
+                                                   kSecProtocolTypeAny,
+                                                   kSecAuthenticationTypeAny,
                                                    &length,
                                                    &data,
                                                    &item);
@@ -195,8 +223,8 @@ Credentials getCredentialsForItem(CFDictionaryRef item) {
     &kCFTypeDictionaryKeyCallBacks,
     &kCFTypeDictionaryValueCallBacks);
 
-  CFDictionaryAddValue(query, kSecAttrService, service);
-  CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword);
+  CFDictionaryAddValue(query, kSecAttrServer, service);
+  CFDictionaryAddValue(query, kSecClass, kSecClassInternetPassword);
   CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitOne);
   CFDictionaryAddValue(query, kSecReturnAttributes, kCFBooleanTrue);
   CFDictionaryAddValue(query, kSecReturnData, kCFBooleanTrue);
@@ -238,8 +266,8 @@ KEYTAR_OP_RESULT FindCredentials(const std::string& service,
     0,
     &kCFTypeDictionaryKeyCallBacks,
     &kCFTypeDictionaryValueCallBacks);
-  CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword);
-  CFDictionaryAddValue(query, kSecAttrService, serviceStr);
+  CFDictionaryAddValue(query, kSecClass, kSecClassInternetPassword);
+  CFDictionaryAddValue(query, kSecAttrServer, serviceStr);
   CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitAll);
   CFDictionaryAddValue(query, kSecReturnRef, kCFBooleanTrue);
   CFDictionaryAddValue(query, kSecReturnAttributes, kCFBooleanTrue);
@@ -248,15 +276,21 @@ KEYTAR_OP_RESULT FindCredentials(const std::string& service,
   OSStatus status = SecItemCopyMatching((CFDictionaryRef) query, &result);
 
   if (status == errSecSuccess) {
+
     CFArrayRef resultArray = (CFArrayRef) result;
     int resultCount = CFArrayGetCount(resultArray);
-
     for (int idx = 0; idx < resultCount; idx++) {
       CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(
         resultArray,
         idx);
 
-      Credentials cred = getCredentialsForItem(item);
+CFStringRef service = (CFStringRef) CFDictionaryGetValue(item, kSecAttrServer);
+CFStringRef account = (CFStringRef) CFDictionaryGetValue(item, kSecAttrAccount);
+
+
+Credentials cred = Credentials(
+  CFStringToStdString(service),
+  CFStringToStdString(account));
       credentials->push_back(cred);
     }
   } else if (status == errSecItemNotFound) {
