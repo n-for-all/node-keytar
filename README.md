@@ -36,21 +36,21 @@ const keytar = require('keytar')
 
 Every function in keytar is asynchronous and returns a promise. The promise will be rejected with any error that occurs or will be resolved with the function's "yields" value.
 
-### getPassword(service, account)
+### getPassword(server, account)
 
-Get the stored password for the `service` and `account`.
+Get the stored password for the `server` and `account`.
 
-`service` - The string service name.
+`server` - The string server name.
 
 `account` - The string account name.
 
 Yields the string password or `null` if an entry for the given service and account was not found.
 
-### setPassword(service, account, password)
+### setPassword(server, account, password)
 
-Save the `password` for the `service` and `account` to the keychain. Adds a new entry if necessary, or updates an existing entry if one exists.
+Save the `password` for the `server` and `account` to the keychain. Adds a new entry if necessary, or updates an existing entry if one exists.
 
-`service` - The string service name.
+`server` - The string server name.
 
 `account` - The string account name.
 
@@ -58,28 +58,28 @@ Save the `password` for the `service` and `account` to the keychain. Adds a new 
 
 Yields nothing.
 
-### deletePassword(service, account)
+### deletePassword(server, account)
 
-Delete the stored password for the `service` and `account`.
+Delete the stored password for the `server` and `account`.
 
-`service` - The string service name.
+`server` - The string server name.
 
 `account` - The string account name.
 
-Yields `true` if a password was deleted, or `false` if an entry with the given service and account was not found.
+Yields `true` if a password was deleted, or `false` if an entry with the given server and account was not found.
 
-### findPassword(service)
+### findPassword(server)
 
-Find a password for the `service` in the keychain.
+Find a password for the `server` in the keychain.
 
-`service` - The string service name.
+`server` - The string server name.
 
-Yields the string password, or `null` if an entry for the given service and account was not found.
+Yields the string password, or `null` if an entry for the given server and account was not found.
 
-### findCredentials(service)
+### findCredentials(server)
 
-Find all accounts and password for the `service` in the keychain.
+Find all accounts for the `server` in the keychain.
 
-`service` - The string service name.
+`server` - The string server name.
 
-Yields an array of `{ account: 'foo', password: 'bar' }`.
+Yields an array of `{ account: 'user', server: 'example.com', settings: {port, protocol?, domain?, path?} }`.
