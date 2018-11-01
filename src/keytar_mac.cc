@@ -215,10 +215,7 @@ KEYTAR_OP_RESULT FindPassword(const std::string& service,
 KEYTAR_OP_RESULT FindCredentials(const std::string& service,
                                  std::vector<Credentials>* credentials,
                                  std::string* error) {
-        CFStringRef serviceStr = CFStringCreateWithCString(
-                NULL,
-                service.c_str(),
-                kCFStringEncodingUTF8);
+
 
         CFMutableDictionaryRef query = CFDictionaryCreateMutable(
                 NULL,
@@ -226,7 +223,13 @@ KEYTAR_OP_RESULT FindCredentials(const std::string& service,
                 &kCFTypeDictionaryKeyCallBacks,
                 &kCFTypeDictionaryValueCallBacks);
         CFDictionaryAddValue(query, kSecClass, kSecClassInternetPassword);
-        CFDictionaryAddValue(query, kSecAttrServer, serviceStr);
+        if(!service.empty()){
+            CFStringRef serviceStr = CFStringCreateWithCString(
+                    NULL,
+                    service.c_str(),
+                    kCFStringEncodingUTF8);
+            CFDictionaryAddValue(query, kSecAttrServer, serviceStr);
+        }
         CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitAll);
         CFDictionaryAddValue(query, kSecReturnRef, kCFBooleanTrue);
         CFDictionaryAddValue(query, kSecReturnAttributes, kCFBooleanTrue);
