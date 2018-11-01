@@ -185,7 +185,6 @@ void FindCredentialsWorker::Execute() {
 
 void FindCredentialsWorker::HandleOKCallback() {
         Nan::HandleScope scope;
-        std::cout << "ok";
         if (success) {
                 v8::Local<v8::Array> val = Nan::New<v8::Array>(credentials.size());
                 unsigned int idx = 0;
@@ -193,8 +192,6 @@ void FindCredentialsWorker::HandleOKCallback() {
                 std::vector<keytar::Credentials>::iterator it;
                 for (it = credentials.begin(); it != credentials.end(); it++) {
                         keytar::Credentials cred = *it;
-                        std::cout << "(" << std::get<0>(cred) << ", " << std::get<1>(cred)
-                                  << ") \n";
                         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
                         v8::Local<v8::String> server = Nan::New<v8::String>(
